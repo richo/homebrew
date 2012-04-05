@@ -5,6 +5,8 @@ class Mutt < Formula
   homepage 'http://www.mutt.org/'
   md5 'a29db8f1d51e2f10c070bf88e8a553fd'
 
+  head 'git://git.debian.org/git/pkg-mutt/mutt.git'
+
   depends_on 'tokyo-cabinet'
   depends_on 'slang' if ARGV.include? '--with-slang'
 
@@ -20,38 +22,71 @@ class Mutt < Formula
   end
 
   def patches
-    urls = [
-      ['--sidebar-patch', 'https://raw.github.com/nedos/mutt-sidebar-patch/master/mutt-sidebar.patch'],
-      ['--trash-patch', 'http://patch-tracker.debian.org/patch/series/dl/mutt/1.5.21-5/features/trash-folder'],
-      ['--ignore-thread-patch', 'http://ben.at.tanjero.com/patches/ignore-thread-1.5.21.patch'],
-      ['--pgp-verbose-mime-patch',
-          'http://patch-tracker.debian.org/patch/series/dl/mutt/1.5.21-5/features-old/patch-1.5.4.vk.pgp_verbose_mime'],
-    ]
+    unless ARGV.build_head?
+      urls = [
+        ['--sidebar-patch', 'https://raw.github.com/nedos/mutt-sidebar-patch/master/mutt-sidebar.patch'],
+        ['--trash-patch', 'http://patch-tracker.debian.org/patch/series/dl/mutt/1.5.21-5/features/trash-folder'],
+        ['--ignore-thread-patch', 'http://ben.at.tanjero.com/patches/ignore-thread-1.5.21.patch'],
+        ['--pgp-verbose-mime-patch',
+            'http://patch-tracker.debian.org/patch/series/dl/mutt/1.5.21-5/features-old/patch-1.5.4.vk.pgp_verbose_mime'],
+      ]
 
-    p = []
-    urls.each do |u|
-      p << u[1] if ARGV.include? u[0]
+      p = []
+      urls.each do |u|
+        p << u[1] if ARGV.include? u[0]
+      end
+      return p
     end
-    return p
   end
 
   def install
-    args = ["--disable-dependency-tracking",
-            "--disable-warnings",
-            "--prefix=#{prefix}",
-            "--with-ssl",
-            "--with-sasl",
-            "--with-gnutls",
-            "--with-gss",
-            "--enable-imap",
-            "--enable-smtp",
-            "--enable-pop",
-            "--enable-hcache",
-            "--with-tokyocabinet",
-            # This is just a trick to keep 'make install' from trying to chgrp
-            # the mutt_dotlock file (which we can't do if we're running as an
-            # unpriviledged user)
-            "--with-homespool=.mbox"]
+    if ARGV.build_head?
+      ENV['QUILT_PATCHES'] = "debian/patches"
+      system "quilt --quiltrc /dev/null push -a"
+      system "./prepare"
+
+      args = [
+        "--prefix=#{prefix}",
+        "--sysconfdir=/etc",
+        "--with-mailpath=/var/mail",
+        "--disable-dependency-tracking",
+        "--enable-compressed",
+        "--enable-debug",
+        "--enable-fcntl",
+        "--enable-hcache",
+        "--enable-gpgme",
+        "--enable-imap",
+        "--enable-smtp",
+        "--enable-inodesort",
+        "--enable-pop",
+        "--with-curses",
+        "--with-gnutls",
+        "--with-gss",
+        "--with-idn",
+        "--with-mixmaster",
+        "--with-sasl",
+        "--without-gdbm",
+        "--without-bdb",
+        "--without-qdbm"
+      ]
+    else
+      args = ["--disable-dependency-tracking",
+              "--disable-warnings",
+              "--prefix=#{prefix}",
+              "--with-ssl",
+              "--with-sasl",
+              "--with-gnutls",
+              "--with-gss",
+              "--enable-imap",
+              "--enable-smtp",
+              "--enable-pop",
+              "--enable-hcache",
+              "--with-tokyocabinet",
+              # This is just a trick to keep 'make install' from trying to chgrp
+              # the mutt_dotlock file (which we can't do if we're running as an
+              # unpriviledged user)
+              "--with-homespool=.mbox"]
+    end
     args << "--with-slang" if ARGV.include? '--with-slang'
 
     if ARGV.include? '--enable-debug'
