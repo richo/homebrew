@@ -5,9 +5,11 @@ class Mutt < Formula
   homepage 'http://www.mutt.org/'
   md5 'a29db8f1d51e2f10c070bf88e8a553fd'
 
-  head 'git://git.debian.org/git/pkg-mutt/mutt.git'
+  head 'git://github.com/psych0tik/mutt.git'
 
   depends_on 'tokyo-cabinet'
+  depends_on 'docbook'
+  depends_on 'intltool'
   depends_on 'slang' if ARGV.include? '--with-slang'
 
   def options
@@ -40,6 +42,7 @@ class Mutt < Formula
   end
 
   def install
+    ENV['XML_CATALOG_FILES']="/usr/local/etc/xml/catalog"
     if ARGV.build_head?
       ENV['QUILT_PATCHES'] = "debian/patches"
       system "quilt --quiltrc /dev/null push -a"
@@ -47,7 +50,6 @@ class Mutt < Formula
 
       args = [
         "--prefix=#{prefix}",
-        "--sysconfdir=/etc",
         "--with-mailpath=/var/mail",
         "--disable-dependency-tracking",
         "--enable-compressed",
@@ -65,27 +67,30 @@ class Mutt < Formula
         "--with-idn",
         "--with-mixmaster",
         "--with-sasl",
+        "--with-homespool=.mbox",
         "--without-gdbm",
         "--without-bdb",
         "--without-qdbm"
       ]
     else
-      args = ["--disable-dependency-tracking",
-              "--disable-warnings",
-              "--prefix=#{prefix}",
-              "--with-ssl",
-              "--with-sasl",
-              "--with-gnutls",
-              "--with-gss",
-              "--enable-imap",
-              "--enable-smtp",
-              "--enable-pop",
-              "--enable-hcache",
-              "--with-tokyocabinet",
-              # This is just a trick to keep 'make install' from trying to chgrp
-              # the mutt_dotlock file (which we can't do if we're running as an
-              # unpriviledged user)
-              "--with-homespool=.mbox"]
+      args = [
+        "--disable-dependency-tracking",
+        "--disable-warnings",
+        "--prefix=#{prefix}",
+        "--with-ssl",
+          "--with-sasl",
+          "--with-gnutls",
+          "--with-gss",
+          "--enable-imap",
+          "--enable-smtp",
+          "--enable-pop",
+          "--enable-hcache",
+          "--with-tokyocabinet",
+          # This is just a trick to keep 'make install' from trying to chgrp
+          # the mutt_dotlock file (which we can't do if we're running as an
+          # unpriviledged user)
+          "--with-homespool=.mbox"
+      ]
     end
     args << "--with-slang" if ARGV.include? '--with-slang'
 
@@ -96,6 +101,7 @@ class Mutt < Formula
     end
 
     system "./configure", *args
+    system "make"
     system "make install"
   end
 end
