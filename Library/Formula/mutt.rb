@@ -8,8 +8,15 @@ class Mutt < Formula
   head 'git://github.com/psych0tik/mutt.git'
 
   depends_on 'tokyo-cabinet'
+  depends_on 'gpgme'
+  depends_on 'gnutls'
   depends_on 'docbook'
   depends_on 'intltool'
+  depends_on 'quilt' => :build
+  # Xcode 4.3 ?
+  depends_on 'autoconf' => :build
+  depends_on 'automake' => :build
+  depends_on 'libtool' => :build
   depends_on 'slang' if ARGV.include? '--with-slang'
 
   def options
