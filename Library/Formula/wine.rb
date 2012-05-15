@@ -115,7 +115,7 @@ index 09f9b73..ed198f8 100644
 --- a/tools/winebuild/utils.c
 +++ b/tools/winebuild/utils.c
 @@ -345,10 +345,11 @@ struct strarray *get_as_command(void)
- 
+
      if (!as_command)
      {
 -        static const char * const commands[] = { "gas", "as", NULL };
@@ -125,6 +125,22 @@ index 09f9b73..ed198f8 100644
      }
      strarray_add_one( args, as_command );
 +    strarray_add_one( args, "-c" );
- 
+
      if (force_pointer_size)
      {
+diff --git a/include/windef.h b/include/windef.h
+index 9cf98e7..bc2d82e 100644
+--- a/include/windef.h
++++ b/include/windef.h
+@@ -53,11 +53,7 @@ extern "C" {
+ #ifndef __stdcall
+ # ifdef __i386__
+ #  ifdef __GNUC__
+-#   ifdef __APPLE__ /* Mac OS X uses a 16-byte aligned stack and not a 4-byte one */
+ #    define __stdcall __attribute__((__stdcall__)) __attribute__((__force_align_arg_pointer__))
+-#   else
+-#    define __stdcall __attribute__((__stdcall__))
+-#   endif
+ #  elif defined(_MSC_VER)
+     /* Nothing needs to be done. __stdcall already exists */
+ #  else
