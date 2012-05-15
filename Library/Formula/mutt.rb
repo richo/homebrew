@@ -17,6 +17,7 @@ class Mutt < Formula
   depends_on 'autoconf' => :build
   depends_on 'automake' => :build
   depends_on 'libtool' => :build
+  depends_on 'w3m' => :build
   depends_on 'slang' if ARGV.include? '--with-slang'
 
   def options
