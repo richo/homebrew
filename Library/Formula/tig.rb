@@ -5,7 +5,7 @@ class Tig < Formula
   url 'http://jonas.nitro.dk/tig/releases/tig-1.0.tar.gz'
   md5 'a2d414d1cebbc9cd4f3d545bc6f225c6'
 
-  head 'git://github.com/richo/tig.git'
+  head 'git://github.com/jonas/tig.git'
 
   if ARGV.build_head?
     depends_on "xmlto" => :build
